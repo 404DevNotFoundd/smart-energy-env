@@ -1,21 +1,12 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from inference import main
+def main(input_data):
+    text = input_data.get("text", "").lower()
 
-app = FastAPI()
+    if "win" in text:
+        result = "positive"
+    else:
+        result = "neutral"
 
-class InputData(BaseModel):
-    text: str
-
-@app.get("/")
-def home():
-    return {"status": "running"}
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-@app.post("/predict")
-def predict(data: InputData):
-    result = main(data.dict())
-    return result
+    return {
+        "input": input_data.get("text"),
+        "prediction": result
+    }
