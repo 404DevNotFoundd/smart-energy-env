@@ -1,11 +1,37 @@
-import os
-from tasks import run_all_tasks
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-print("[START] Running Smart Energy Environment")
+app = FastAPI()
 
-results = run_all_tasks()
+# Root endpoint (FIXES YOUR 404 ISSUE)
+@app.get("/")
+def home():
+    return {
+        "status": "running",
+        "message": "API is live and working"
+    }
 
-for task, score in results.items():
-    print(f"[STEP] Task: {task}, Score: {score}")
+# Health check endpoint (often required in hackathons)
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
-print("[END] Completed Execution")
+# Example request model
+class InputData(BaseModel):
+    text: str
+
+# Example inference endpoint (you can modify logic later)
+@app.post("/predict")
+def predict(data: InputData):
+    text = data.text.lower()
+
+    # dummy logic (replace with your model later)
+    if "win" in text:
+        result = "positive"
+    else:
+        result = "neutral"
+
+    return {
+        "input": data.text,
+        "prediction": result
+    }
