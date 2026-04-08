@@ -1,0 +1,15 @@
+name: smart-energy-distribution
+description: RL environment for optimizing power allocation in smart grids
+version: 1.0
+
+observation_model: Observation
+action_model: Action
+reward_model: Reward
+
+tasks:
+  - name: easy
+    difficulty: easy
+  - name: medium
+    difficulty: medium
+  - name: hard
+    difficulty: hard
