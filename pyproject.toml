@@ -1,15 +1,20 @@
-name: smart-energy-distribution
-description: RL environment for optimizing power allocation in smart grids
-version: 1.0
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
 
-observation_model: Observation
-action_model: Action
-reward_model: Reward
+[project]
+name = "smart-energy-openenv"
+version = "1.0.0"
+description = "Smart Energy OpenEnv Hackathon Submission"
+requires-python = ">=3.9"
 
-tasks:
-  - name: easy
-    difficulty: easy
-  - name: medium
-    difficulty: medium
-  - name: hard
-    difficulty: hard
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "pydantic",
+  "numpy",
+  "openenv-core>=0.2.0"
+]
+
+[project.scripts]
+server = "server.app:app"
