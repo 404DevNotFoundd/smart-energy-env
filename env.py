@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 import random
 
-# ---------- MODELS ----------
 class Observation(BaseModel):
     region_demands: list
     available_power: int
@@ -13,8 +12,6 @@ class Action(BaseModel):
 class Reward(BaseModel):
     score: float
 
-
-# ---------- ENVIRONMENT ----------
 class SmartEnergyEnv:
     def __init__(self, regions=3):
         self.regions = regions
@@ -37,20 +34,12 @@ class SmartEnergyEnv:
         allocation = action.allocation
         demands = self.state_data["region_demands"]
 
-        # ---------- REWARD ----------
         error = sum(abs(a - d) for a, d in zip(allocation, demands))
-        total_demand = sum(demands)
-
-        # Score between 0.0 - 1.0
-        score = max(0.0, 1.0 - (error / (total_demand + 1)))
-
-        # Penalty for exceeding power
-        if sum(allocation) > self.state_data["available_power"]:
-            score *= 0.5
+        max_error = sum(demands)
+        score = max(0.0, 1.0 - (error / (max_error + 1)))
 
         reward = Reward(score=round(score, 3))
 
-        # ---------- NEXT STATE ----------
         self.time += 1
         self.state_data["time_step"] = self.time
         self.state_data["region_demands"] = [
