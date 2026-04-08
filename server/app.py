@@ -1,31 +1,36 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from inference import main as inference_main
-from tasks import run_all_tasks
+from env import SmartEnergyEnv, Action
 
 app = FastAPI()
 
-class InputData(BaseModel):
-    text: str
+env = SmartEnergyEnv()
 
+# ✅ Root endpoint (prevents 404)
 @app.get("/")
 def home():
     return {"status": "running"}
 
+# ✅ Health check
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-# ✅ Required for validator
-@app.post("/run")
-def run():
-    return run_all_tasks()
+# ✅ REQUIRED: Reset environment
+@app.post("/reset")
+def reset():
+    obs = env.reset()
+    return obs.dict()
 
-# Optional (keep your predict)
-@app.post("/predict")
-def predict(data: InputData):
-    return inference_main(data.dict())
+# ✅ REQUIRED: Step function
+@app.post("/step")
+def step(action: Action):
+    obs, reward, done, _ = env.step(action)
+    return {
+        "observation": obs.dict(),
+        "reward": reward.dict(),
+        "done": done
+    }
 
-# Entry point
+# ✅ Entry point (VERY IMPORTANT)
 def main():
     return app
