@@ -5,15 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "smart-energy-openenv"
 version = "1.0.0"
-description = "Smart Energy Distribution OpenEnv for Meta x Hugging Face Hackathon"
-authors = [
-  { name = "Hackathon User" }
-]
+description = "Smart Energy OpenEnv Hackathon Submission"
 requires-python = ">=3.9"
 
 dependencies = [
   "fastapi",
   "uvicorn",
   "pydantic",
-  "numpy"
+  "numpy",
+  "openenv-core>=0.2.0"
 ]
+
+[project.scripts]
+server = "server.app:app"
