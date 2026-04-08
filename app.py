@@ -5,24 +5,14 @@ from env import SmartEnergyEnv
 app = FastAPI()
 env = SmartEnergyEnv()
 
-# ---------------- ROOT (FIX FOR 404) ----------------
 @app.get("/")
 def root():
-    return {
-        "status": "ok",
-        "message": "Smart Energy OpenEnv is running"
-    }
+    return {"status": "ok"}
 
-# ---------------- RESET ----------------
 @app.post("/reset")
 def reset():
-    obs = env.reset()
-    return {
-        "observation": obs,
-        "message": "Environment reset successful"
-    }
+    return {"observation": env.reset()}
 
-# ---------------- STEP ----------------
 class ActionRequest(BaseModel):
     action: dict
 
@@ -36,7 +26,6 @@ def step(req: ActionRequest):
         "info": info
     }
 
-# ---------------- STATE ----------------
 @app.get("/state")
 def state():
     return env.state()
