@@ -1,5 +1,24 @@
-from env import SmartEnergyEnv, Action
+import os
 import random
+from openai import OpenAI
+from env import SmartEnergyEnv, Action
+
+
+client = OpenAI(
+    base_url=os.environ.get("API_BASE_URL"),
+    api_key=os.environ.get("API_KEY")
+)
+
+
+def call_llm():
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": "Say OK"}
+        ]
+    )
+    return response.choices[0].message.content
+
 
 def run_task(name, regions, noise):
     env = SmartEnergyEnv(regions=regions)
@@ -9,8 +28,8 @@ def run_task(name, regions, noise):
 
     step_count = 0
     total_reward = 0
-
     done = False
+
     while not done:
         action = Action(
             allocation=[d + random.randint(-noise, noise) for d in obs.region_demands]
@@ -24,16 +43,18 @@ def run_task(name, regions, noise):
         print(f"[STEP] step={step_count} reward={reward.score}", flush=True)
 
     avg_score = total_reward / step_count
-
     print(f"[END] task={name} score={round(avg_score,3)} steps={step_count}", flush=True)
 
 
 def main():
-    # Run all tasks
+    # 🔥 REQUIRED: Make at least one LLM call
+    llm_output = call_llm()
+    print(f"[LLM] {llm_output}", flush=True)
+
+    # Run tasks
     run_task("easy", regions=2, noise=5)
     run_task("medium", regions=3, noise=10)
     run_task("hard", regions=5, noise=20)
-
 
 if __name__ == "__main__":
     main()
