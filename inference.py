@@ -1,23 +1,30 @@
 import os
 import random
-from openai import OpenAI
 from env import SmartEnergyEnv, Action
 
+try:
+    from openai import OpenAI
 
-client = OpenAI(
-    base_url=os.environ.get("API_BASE_URL"),
-    api_key=os.environ.get("API_KEY")
-)
+    client = OpenAI(
+        base_url=os.environ.get("API_BASE_URL"),
+        api_key=os.environ.get("API_KEY")
+    )
+except:
+    client = None
 
 
 def call_llm():
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": "Say OK"}
-        ]
-    )
-    return response.choices[0].message.content
+    if client is None:
+        return "LLM not available"
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "Say OK"}]
+        )
+        return response.choices[0].message.content
+    except Exception:
+        return "LLM call failed"
 
 
 def run_task(name, regions, noise):
@@ -47,11 +54,10 @@ def run_task(name, regions, noise):
 
 
 def main():
-    # 🔥 REQUIRED: Make at least one LLM call
+    # REQUIRED LLM call
     llm_output = call_llm()
     print(f"[LLM] {llm_output}", flush=True)
 
-    # Run tasks
     run_task("easy", regions=2, noise=5)
     run_task("medium", regions=3, noise=10)
     run_task("hard", regions=5, noise=20)
