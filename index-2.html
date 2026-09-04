@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GridAI — Smart Energy Control Center</title>
+<style>
+:root{--bg:#070b12;--panel:#0d141f;--panel2:#101a27;--line:#1d2a3b;--text:#eef5ff;--muted:#7f91a8;--green:#35e29a;--cyan:#42c9ff;--amber:#ffbf5a;--red:#ff667d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% -10%,#123047 0,#070b12 42%);color:var(--text);font:14px Inter,system-ui,Segoe UI,Arial,sans-serif}
+button{font:inherit}.app{max-width:1500px;margin:auto;padding:22px}.top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}.brand{display:flex;gap:12px;align-items:center}.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#35e29a,#42c9ff);display:grid;place-items:center;color:#06110d;font-weight:900;font-size:21px}.brand h1{margin:0;font-size:20px}.brand small{color:var(--muted)}.live{display:flex;align-items:center;gap:8px;color:#bdebd7}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px var(--green)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:linear-gradient(180deg,#0f1825,#0b121d);border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 10px 30px #0005}.metric{min-height:116px}.metric .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.metric .num{font-size:29px;font-weight:750;margin:10px 0 3px}.up{color:var(--green)}.blue{color:var(--cyan)}.amber{color:var(--amber)}.metric span{color:var(--muted);font-size:12px}
+.layout{display:grid;grid-template-columns:1.45fr .8fr;gap:12px;margin-top:12px}.wide{min-height:380px}.title{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.title h2{font-size:15px;margin:0}.title small{color:var(--muted)}
+canvas{width:100%;height:300px;display:block}.legend{display:flex;gap:18px;color:var(--muted);font-size:12px}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.energy-flow{display:flex;flex-direction:column;gap:10px}.source{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#0a111b}.ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:#152235}.source strong{display:block}.source span{font-size:12px;color:var(--muted)}.source .right{margin-left:auto;text-align:right}.flowline{height:18px;position:relative}.flowline:before{content:"";position:absolute;left:30px;right:30px;top:8px;border-top:2px dashed #2a4255}.pulse{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--green);top:5px;animation:flow 1.8s linear infinite}@keyframes flow{from{left:32px}to{left:calc(100% - 38px)}}.region{margin-bottom:14px}.regionhead{display:flex;justify-content:space-between;margin-bottom:7px}.regionhead span{color:var(--muted)}.track{height:9px;border-radius:10px;background:#182536;overflow:hidden}.fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--green),var(--cyan))}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#111d2d;color:var(--text);cursor:pointer}.btn.primary{background:linear-gradient(135deg,#32d993,#28b8d7);color:#06100c;border:0;font-weight:800}.btn:hover{filter:brightness(1.12)}input[type=range]{width:100%;accent-color:var(--green)}.score{display:flex;align-items:center;gap:18px}.ring{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) var(--p),#1c2a3b 0)}.ring:after{content:"";width:64px;height:64px;border-radius:50%;background:#0c141f;position:absolute}.ring b{position:relative;z-index:1;font-size:18px}.scoretext strong{font-size:18px}.scoretext p{margin:5px 0;color:var(--muted);font-size:12px}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:12px}.table th{color:var(--muted);font-weight:500}.status{padding:4px 8px;border-radius:99px;background:#10291f;color:#6ff0b5}.footer{margin-top:12px;color:#5f7188;font-size:11px;display:flex;justify-content:space-between}
+@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}}@media(max-width:600px){.grid{grid-template-columns:1fr}.app{padding:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand"><div class="logo">⚡</div><div><h1>GridAI Control Center</h1><small>Intelligent energy distribution & optimization</small></div></div><div class="live"><span class="dot"></span> SYSTEM ONLINE &nbsp; <span id="clock"></span></div></header>
+
+<section class="grid">
+<div class="card metric"><div class="label">Grid Load</div><div class="num" id="load">142.4 kW</div><span class="up">▲ 4.2% vs previous hour</span></div>
+<div class="card metric"><div class="label">Renewable Generation</div><div class="num blue" id="renew">78.6 kW</div><span>Solar + wind contribution</span></div>
+<div class="card metric"><div class="label">Battery State</div><div class="num amber" id="battery">84%</div><span id="batteryPower">Charging • 18.2 kW</span></div>
+<div class="card metric"><div class="label">AI Efficiency</div><div class="num up" id="eff">94.8%</div><span>Optimization confidence: High</span></div>
+</section>
+
+<div class="layout">
+<section class="card wide"><div class="title"><h2>Real-Time Grid Performance</h2><small>Last 60 minutes</small></div><canvas id="chart" width="900" height="300"></canvas><div class="legend"><span><i style="background:#42c9ff"></i>Demand</span><span><i style="background:#35e29a"></i>Renewables</span><span><i style="background:#ffbf5a"></i>AI Allocation</span></div></section>
+
+<section class="card"><div class="title"><h2>Energy Flow</h2><small>Live</small></div><div class="energy-flow">
+<div class="source"><div class="ico">☀️</div><div><strong>Solar Farm</strong><span>Renewable source</span></div><div class="right"><b id="solar">52.4 kW</b><span>Online</span></div></div>
+<div class="flowline"><span class="pulse"></span></div>
+<div class="source"><div class="ico">🔋</div><div><strong>Battery Storage</strong><span>Peak balancing</span></div><div class="right"><b id="batflow">+18.2 kW</b><span>Charging</span></div></div>
+<div class="flowline"><span class="pulse"></span></div>
+<div class="source"><div class="ico">🏭</div><div><strong>Grid Supply</strong><span>Utility connection</span></div><div class="right"><b id="grid">63.8 kW</b><span>Stable</span></div></div>
+<div class="flowline"><span class="pulse"></span></div>
+<div class="source"><div class="ico">🏙️</div><div><strong>Consumers</strong><span>3 active regions</span></div><div class="right"><b id="consumer">142.4 kW</b><span>Demand</span></div></div>
+</div></section>
+
+<section class="card"><div class="title"><h2>Regional Demand</h2><small>AI allocation</small></div><div id="regions"></div></section>
+
+<section class="card"><div class="title"><h2>AI Optimizer</h2><small>Decision engine</small></div>
+<div class="score"><div class="ring" id="ring" style="--p:94.8%"><b id="score">94.8%</b></div><div class="scoretext"><strong>Optimal strategy</strong><p id="aiMsg">Allocation is closely matched to current demand.</p></div></div>
+<div class="controls" style="margin-top:18px"><button class="btn primary" onclick="optimize()">🤖 Auto Optimize</button><button class="btn" onclick="next()">▶ Next Step</button><button class="btn" onclick="reset()">↻ Reset</button><button class="btn" onclick="randomize()">⚙ Simulate</button></div>
+<p style="color:var(--muted);font-size:11px;line-height:1.5;margin-top:14px">AI objective: minimize regional supply mismatch while keeping total allocation within available grid power.</p>
+</section>
+</div>
+
+<section class="card" style="margin-top:12px"><div class="title"><h2>Regional Allocation Monitor</h2><small>Current episode: <span id="step">1</span> / 10</small></div><table class="table"><thead><tr><th>REGION</th><th>DEMAND</th><th>ALLOCATED</th><th>UTILIZATION</th><th>STATUS</th></tr></thead><tbody id="table"></tbody></table></section>
+<div class="footer"><span>GridAI Simulation • Browser-only demo</span><span>Available capacity: 200 kW</span></div>
+</div>
+
+<script>
+const MAX=200, names=["North District","Central District","South District"];
+let demand=[54,47,41], alloc=[54,47,41], step=1, history=[];
+const $=id=>document.getElementById(id);
+function randDemand(){return [1,2,3].map(()=>Math.floor(30+Math.random()*55))}
+function reward(){let e=demand.reduce((s,d,i)=>s+Math.abs(d-alloc[i]),0),t=demand.reduce((a,b)=>a+b,0);return Math.max(0,Math.min(1,1-e/(t+1)))}
+function render(){
+  $("step").textContent=step;
+  let total=demand.reduce((a,b)=>a+b,0), r=reward();
+  $("load").textContent=total.toFixed(1)+" kW"; $("consumer").textContent=total.toFixed(1)+" kW";
+  let renew=total*(.48+Math.random()*.08), solar=renew*.67, grid=Math.max(0,total-renew);
+  $("renew").textContent=renew.toFixed(1)+" kW"; $("solar").textContent=solar.toFixed(1)+" kW"; $("grid").textContent=grid.toFixed(1)+" kW";
+  $("eff").textContent=(r*100).toFixed(1)+"%"; $("score").textContent=(r*100).toFixed(1)+"%"; $("ring").style.setProperty("--p",(r*100)+"%");
+  $("aiMsg").textContent=r>.9?"Allocation is closely matched to current demand.":r>.7?"Minor imbalance detected. Optimize for a better score.":"Significant mismatch detected. Run Auto Optimize.";
+  $("battery").textContent=Math.round(78+r*18)+"%";
+  $("batteryPower").textContent=r>.9?"Charging • 18.2 kW":"Balancing • 11.5 kW";
+  $("regions").innerHTML=demand.map((d,i)=>`<div class="region"><div class="regionhead"><b>${names[i]}</b><span>${d} kW demand · ${alloc[i]} kW allocated</span></div><div class="track"><div class="fill" style="width:${Math.min(100,alloc[i]/d*100)}%"></div></div></div>`).join("");
+  $("table").innerHTML=demand.map((d,i)=>{let u=alloc[i]/d*100;return `<tr><td>${names[i]}</td><td>${d} kW</td><td>${alloc[i]} kW</td><td>${u.toFixed(0)}%</td><td><span class="status">${Math.abs(d-alloc[i])<5?"Optimal":"Balanced"}</span></td></tr>`}).join("");
+  draw();
+}
+function optimize(){alloc=[...demand];render()}
+function randomize(){demand=randDemand();alloc=alloc.map(x=>Math.min(100,x));render()}
+function next(){history.push(reward());if(step<10){step++;demand=randDemand();alloc=[0,0,0];optimize()}else render()}
+function reset(){step=1;demand=[54,47,41];alloc=[54,47,41];history=[];render()}
+function draw(){
+ let c=$("chart"),x=c.getContext("2d"),w=c.width,h=c.height;x.clearRect(0,0,w,h);
+ let vals=[],base=demand.reduce((a,b)=>a+b,0);for(let i=0;i<25;i++) vals.push(base*(.82+Math.sin(i*.5)*.08+Math.random()*.05));
+ x.strokeStyle="#1d2a3b";x.lineWidth=1;for(let y=0;y<5;y++){let py=25+y*(h-55)/4;x.beginPath();x.moveTo(45,py);x.lineTo(w-15,py);x.stroke()}
+ function line(data,color,scale){x.strokeStyle=color;x.lineWidth=2.5;x.beginPath();data.forEach((v,i)=>{let px=45+i*(w-65)/(data.length-1),py=h-35-(v/200)*(h-70);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()}
+ let ren=vals.map(v=>v*(.47+Math.random()*.04)), ai=vals.map(v=>v*(.96+Math.random()*.025));
+ line(vals,"#42c9ff",1);line(ren,"#35e29a",1);line(ai,"#ffbf5a",1);
+ x.fillStyle="#70839d";x.font="11px Arial";x.fillText("200 kW",5,28);x.fillText("100 kW",5,h/2);x.fillText("0",20,h-35);
+}
+function clock(){let d=new Date();$("clock").textContent=d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"})}
+setInterval(clock,1000);clock();reset();
+</script>
+</body>
+</html>
